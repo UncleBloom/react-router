@@ -3,6 +3,7 @@ npm-debug.log
 /build/
 /docs/api/
 /website/build/
+/node_modules/
 node_modules/
 
 /examples/*/yarn.lock

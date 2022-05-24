@@ -174,6 +174,7 @@ export function Router({
   children = null,
   location: locationProp,
   navigationType = NavigationType.Pop,
+  // 就是 history
   navigator,
   static: staticProp = false,
 }: RouterProps): React.ReactElement | null {

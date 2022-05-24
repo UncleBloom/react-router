@@ -194,7 +194,12 @@ export function HashRouter({ basename, children, window }: HashRouterProps) {
     location: history.location,
   });
 
-  React.useLayoutEffect(() => history.listen(setState), [history]);
+  React.useLayoutEffect(() => {
+    /**
+     * 如果没有 block, history 就会在 popstate/push/replace 时调用 setState。
+     */
+    history.listen(setState);
+  }, [history]);
 
   return (
     <Router
