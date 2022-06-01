@@ -620,6 +620,7 @@ export function stripBasename(
     return null;
   }
 
+  // pathname.slice(basename.length) !== "" ? pathname.slice(basename.length) :"/"
   return pathname.slice(basename.length) || "/";
 }
 

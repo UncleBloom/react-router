@@ -161,6 +161,12 @@ export interface RouterProps {
 }
 
 /**
+ * 接收的 prop 有变化的一般就是 action 和 location，其他的在初始化之后一般就不变了。
+ * Router 一般不会直接渲染，是被 HashRouter/BrowserRouter 内部使用的
+ *
+ * Router 的作用就是处理导航的 basename 和 location，并且通过 Context 向下传递
+ */
+/**
  * Provides location context for the rest of the app.
  *
  * Note: You usually won't render a <Router> directly. Instead, you'll render a
@@ -185,6 +191,8 @@ export function Router({
   );
 
   let basename = normalizePathname(basenameProp);
+  // 性能优化，避免每次渲染时都计算 navigationContext
+  // 传入 useMemo 的函数会在渲染期间执行。请不要在这个函数内部执行不应该在渲染期间内执行的操作，诸如副作用这类的操作属于 useEffect 的适用范畴，而不是 useMemo。
   let navigationContext = React.useMemo(
     () => ({ basename, navigator, static: staticProp }),
     [basename, navigator, staticProp]
@@ -194,6 +202,7 @@ export function Router({
     locationProp = parsePath(locationProp);
   }
 
+  // 在解构赋值时设置默认值
   let {
     pathname = "/",
     search = "",
@@ -202,6 +211,7 @@ export function Router({
     key = "default",
   } = locationProp;
 
+  // 除去 pathname 开头的 basename 部分
   let location = React.useMemo(() => {
     let trailingPathname = stripBasename(pathname, basename);
 
@@ -229,6 +239,11 @@ export function Router({
     return null;
   }
 
+  /**
+   * 最后返回了两个 Context.Provider
+   * 子组件通过 Context 拿到 Location 信息和 history 实例
+   * children 就是 Routes 组件
+   */
   return (
     <NavigationContext.Provider value={navigationContext}>
       <LocationContext.Provider

@@ -179,6 +179,10 @@ export interface HashRouterProps {
 }
 
 /**
+ * HashRouter 和 BrowserRouter 是高级组件，将第三方库的函数 createHistory 构建出的
+ * history 实例和 children 作为 props 传递给 Router 组件。
+ */
+/**
  * A `<Router>` for use in web browsers. Stores the location in the hash
  * portion of the URL so it is not sent to the server.
  */
