@@ -54,6 +54,7 @@ export function useHref(to: To): string {
 
 /**
  * Returns true if this component is a descendant of a <Router>.
+ * 判断当前组件是否在一个 Router 中
  *
  * @see https://reactrouter.com/docs/en/v6/api#useinroutercontext
  */
@@ -64,6 +65,7 @@ export function useInRouterContext(): boolean {
 /**
  * Returns the current location object, which represents the current URL in web
  * browsers.
+ * 获取当前跳转的 location
  *
  * Note: If you're using this it may mean you're doing some of your own
  * "routing" in your app, and we'd like to know what your use case is. We may
@@ -85,6 +87,7 @@ export function useLocation(): Location {
 /**
  * Returns the current navigation action which describes how the router came to
  * the current location, either by a pop, push, or replace on the history stack.
+ * 获取当前跳转的 action type
  *
  * @see https://reactrouter.com/docs/en/v6/api#usenavigationtype
  */

@@ -111,13 +111,14 @@ export function Outlet(props: OutletProps): React.ReactElement | null {
 }
 
 export interface RouteProps {
-  caseSensitive?: boolean;
-  children?: React.ReactNode;
+  caseSensitive?: boolean; // 大小写敏感
+  children?: React.ReactNode; // 子路由
   element?: React.ReactNode | null;
   index?: boolean;
   path?: string;
 }
 
+// 路径路由
 export interface PathRouteProps {
   caseSensitive?: boolean;
   children?: React.ReactNode;
@@ -126,11 +127,13 @@ export interface PathRouteProps {
   path: string;
 }
 
+// 布局路由
 export interface LayoutRouteProps {
   children?: React.ReactNode;
   element?: React.ReactNode | null;
 }
 
+// 索引路由
 export interface IndexRouteProps {
   element?: React.ReactNode | null;
   index: true;
@@ -138,12 +141,14 @@ export interface IndexRouteProps {
 
 /**
  * Declares an element that should be rendered at a certain URL path.
+ * Route 组件内部没有进行任何操作，仅仅只是定义 props
  *
  * @see https://reactrouter.com/docs/en/v6/api#route
  */
 export function Route(
   _props: PathRouteProps | LayoutRouteProps | IndexRouteProps
 ): React.ReactElement | null {
+  // Route 不能被直接渲染出来
   invariant(
     false,
     `A <Route> is only ever to be used as the child of <Routes> element, ` +
@@ -164,7 +169,9 @@ export interface RouterProps {
  * 接收的 prop 有变化的一般就是 action 和 location，其他的在初始化之后一般就不变了。
  * Router 一般不会直接渲染，是被 HashRouter/BrowserRouter 内部使用的
  *
- * Router 的作用就是处理导航的 basename 和 location，并且通过 Context 向下传递
+ * Router 的作用就是提供渲染 Route 的上下文
+ * 格式化传入的 basename 和 location，并且通过 Context 向下传递
+ *
  */
 /**
  * Provides location context for the rest of the app.
@@ -190,7 +197,9 @@ export function Router({
       ` You should never have more than one in your app.`
   );
 
+  // 格式化 basename，去掉 url 中连续的第二个 '/'
   let basename = normalizePathname(basenameProp);
+  // 返回全局的导航上下文的信息，路由前缀、导航对象
   // 性能优化，避免每次渲染时都计算 navigationContext
   // 传入 useMemo 的函数会在渲染期间执行。请不要在这个函数内部执行不应该在渲染期间内执行的操作，诸如副作用这类的操作属于 useEffect 的适用范畴，而不是 useMemo。
   let navigationContext = React.useMemo(
@@ -213,6 +222,7 @@ export function Router({
 
   // 除去 pathname 开头的 basename 部分
   let location = React.useMemo(() => {
+    // stripBasename 用于去除 pathname 前面的 basename，如果去除失败则返回 null
     let trailingPathname = stripBasename(pathname, basename);
 
     if (trailingPathname == null) {
@@ -243,6 +253,8 @@ export function Router({
    * 最后返回了两个 Context.Provider
    * 子组件通过 Context 拿到 Location 信息和 history 实例
    * children 就是 Routes 组件
+   *
+   * 唯一的 location 提供者
    */
   return (
     <NavigationContext.Provider value={navigationContext}>

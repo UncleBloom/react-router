@@ -21,6 +21,7 @@ interface NavigationContextObject {
   static: boolean;
 }
 
+// 内部含有 navigator 对象的全局上下文
 export const NavigationContext = React.createContext<NavigationContextObject>(
   null!
 );
@@ -34,6 +35,7 @@ interface LocationContextObject {
   navigationType: NavigationType;
 }
 
+// 内部含有当前 location 和 action，一般用于在内部获取当前 location
 export const LocationContext = React.createContext<LocationContextObject>(
   null!
 );
