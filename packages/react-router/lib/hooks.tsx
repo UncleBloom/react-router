@@ -259,6 +259,12 @@ export function useResolvedPath(to: To): Path {
 }
 
 /**
+ * 该 hooks 在每次重新匹配到路由时就会重新调用渲染新的 element
+ * 多次调用 useRoutes 时需要解决内置的 route 上下文问题，继承外层的匹配结果
+ * 内部通过计算所有的 routes 与当前 location 关系，经过路径权重计算，得到 matches 数组，然后
+ *     将数组重新渲染为嵌套结构的组件
+ */
+/**
  * Returns the element of the route that matched the current location, prepared
  * with the correct context to render the remainder of the route tree. Route
  * elements in the tree must render an <Outlet> to render their child route's
@@ -270,6 +276,7 @@ export function useRoutes(
   routes: RouteObject[],
   locationArg?: Partial<Location> | string
 ): React.ReactElement | null {
+  // 外层必须有 Router 包裹
   invariant(
     useInRouterContext(),
     // TODO: This error is probably because they somehow have 2 versions of the
@@ -277,10 +284,16 @@ export function useRoutes(
     `useRoutes() may be used only in the context of a <Router> component.`
   );
 
+  // 当 useRoutes 为第一层级的路由定义时，matches 为空数组
+  // 当在已经调用了 useRoutes 的渲染环境中渲染时，matches 含有值，代表 Routes 的上下文环境嵌套
   let { matches: parentMatches } = React.useContext(RouteContext);
+  // 最后 match 到的 route（深度最深），并将该 route 作为父级 route
   let routeMatch = parentMatches[parentMatches.length - 1];
+  // 获取到父级 route 的参数，并根据参数操作
   let parentParams = routeMatch ? routeMatch.params : {};
+  // 父级路由的完整 pathname，比如路由设置/foo/*，当前导航 /foo/1，parentPathname 就为/foo/1
   let parentPathname = routeMatch ? routeMatch.pathname : "/";
+  // /*前的部分，就是/foo
   let parentPathnameBase = routeMatch ? routeMatch.pathnameBase : "/";
   let parentRoute = routeMatch && routeMatch.route;
 
@@ -319,8 +332,10 @@ export function useRoutes(
     );
   }
 
+  // 获取上下文环境中的 location
   let locationFromContext = useLocation();
 
+  // 判断是否手动传入 location，否则使用上下文 location
   let location;
   if (locationArg) {
     let parsedLocationArg =
@@ -341,6 +356,7 @@ export function useRoutes(
   }
 
   let pathname = location.pathname || "/";
+  // 剩余的 pathname，全部 pathname - parentPathname
   let remainingPathname =
     parentPathnameBase === "/"
       ? pathname

@@ -45,7 +45,9 @@ if (__DEV__) {
 }
 
 interface RouteContextObject {
+  // 内部含有所有子路由组成的聚合组件，一个 ReactElement
   outlet: React.ReactElement | null;
+  // 一个成功匹配到的路由数组，索引从小到大层级变深
   matches: RouteMatch[];
 }
 

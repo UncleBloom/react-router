@@ -128,6 +128,7 @@ export interface PathRouteProps {
 }
 
 // 布局路由
+// 布局路由能否匹配上取决于其内部的子路由
 export interface LayoutRouteProps {
   children?: React.ReactNode;
   element?: React.ReactNode | null;
@@ -281,6 +282,7 @@ export function Routes({
   children,
   location,
 }: RoutesProps): React.ReactElement | null {
+  // useRoutes 是一种声明式的路由生成方式，通过传入一个配置对象数组来自动生成对应的渲染路由元素
   return useRoutes(createRoutesFromChildren(children), location);
 }
 
@@ -307,6 +309,7 @@ export function createRoutesFromChildren(
       return;
     }
 
+    // 空节点，忽略掉继续往下遍历
     if (element.type === React.Fragment) {
       // Transparently support React.Fragment and its children.
       routes.push.apply(
@@ -316,6 +319,7 @@ export function createRoutesFromChildren(
       return;
     }
 
+    // 不要传入其他组件，只能传入 Route
     invariant(
       element.type === Route,
       `[${
@@ -330,6 +334,7 @@ export function createRoutesFromChildren(
       path: element.props.path,
     };
 
+    // 递归子结点
     if (element.props.children) {
       route.children = createRoutesFromChildren(element.props.children);
     }

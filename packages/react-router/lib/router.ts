@@ -88,10 +88,10 @@ export type Params<Key extends string = string> = {
  * routes organized in a tree-like structure.
  */
 export interface RouteObject {
-  caseSensitive?: boolean;
-  children?: RouteObject[];
-  element?: React.ReactNode;
-  index?: boolean;
+  caseSensitive?: boolean; // 大小写敏感
+  children?: RouteObject[]; // 子路由
+  element?: React.ReactNode; // 要渲染的组件
+  index?: boolean; // 是否是索引路由
   path?: string;
 }
 
