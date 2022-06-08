@@ -263,6 +263,11 @@ export function useResolvedPath(to: To): Path {
  * 多次调用 useRoutes 时需要解决内置的 route 上下文问题，继承外层的匹配结果
  * 内部通过计算所有的 routes 与当前 location 关系，经过路径权重计算，得到 matches 数组，然后
  *     将数组重新渲染为嵌套结构的组件
+ *
+ * useRoutes 做的事情:
+ * 1. 路由上下文解析. 如果是作为子路由使用的,需要合并父路由的匹配信息
+ * 2. 路由匹配. 移除父路由匹配的路由前缀,调用 matchRoutes 与当前传入的 routes 配置匹配,并返回匹配到的 matches 数组
+ * 3. 路由渲染. 调用 _renderMatches 方法,渲染 matches 数组
  */
 /**
  * Returns the element of the route that matched the current location, prepared
@@ -338,6 +343,7 @@ export function useRoutes(
   // 判断是否手动传入 location，否则使用上下文 location
   let location;
   if (locationArg) {
+    // 如果传入的 location，判断是否为父级路由的子路由
     let parsedLocationArg =
       typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
 
@@ -357,10 +363,13 @@ export function useRoutes(
 
   let pathname = location.pathname || "/";
   // 剩余的 pathname，全部 pathname - parentPathname
+  // 剩余的 pathname 才是本次 routes 要匹配的部分（适用于 parentMatches 匹配不为空的情况）
   let remainingPathname =
     parentPathnameBase === "/"
       ? pathname
       : pathname.slice(parentPathnameBase.length) || "/";
+
+  // 通过传入的 routes 配置项与当前的路径，匹配对应的渲染路由
   let matches = matchRoutes(routes, { pathname: remainingPathname });
 
   if (__DEV__) {
@@ -377,9 +386,12 @@ export function useRoutes(
     );
   }
 
+  // 参数是当前匹配到的 matches 路由数组和外层 useRoutes 的 matches 数组(父级路由的 matches 数组)
+  // 返回的是 React.Element, 渲染所有的 matches 对象
   return _renderMatches(
     matches &&
       matches.map((match) =>
+        // 合并外层调用 useRoutes 得到的参数,内部的 Route 会有外层 Route(父 Route)的所有属性
         Object.assign({}, match, {
           params: Object.assign({}, parentParams, match.params),
           pathname: joinPaths([parentPathnameBase, match.pathname]),
@@ -389,6 +401,7 @@ export function useRoutes(
               : joinPaths([parentPathnameBase, match.pathnameBase]),
         })
       ),
+    // 外层 parentMatches 部分最后会一起加入到最终的 matches 参数中
     parentMatches
   );
 }
