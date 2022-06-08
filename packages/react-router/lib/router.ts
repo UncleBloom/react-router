@@ -134,28 +134,40 @@ export interface RouteMatch<ParamKey extends string = string> {
 }
 
 /**
+ * 路由匹配阶段
+ * 通过 routes 与 location 得到 matches 数组
+ *
+ * 主要步骤分为三个阶段:
+ * 1. 数组扁平化并计算权重
+ * 2. 依据权重排序
+ * 3. 路由匹配
+ *
  * Matches the given routes to a location and returns the match data.
  *
  * @see https://reactrouter.com/docs/en/v6/api#matchroutes
  */
 export function matchRoutes(
-  routes: RouteObject[],
-  locationArg: Partial<Location> | string,
-  basename = "/"
+  routes: RouteObject[], // route 对象
+  locationArg: Partial<Location> | string, // 与之匹配的 location (在 useRoute 中已经处理过)
+  basename = "/" // 用户可以使用这个参数来添加统一的路径前缀,这个方法对外暴露(但在 useRoute 中没有用到)
 ): RouteMatch[] | null {
   let location =
     typeof locationArg === "string" ? parsePath(locationArg) : locationArg;
 
+  // 抽离 basename,获取纯粹的 pathname
   let pathname = stripBasename(location.pathname || "/", basename);
 
   if (pathname == null) {
     return null;
   }
 
+  // 扁平化 routes, 将树状的 routes 对象根据 path 扁平化为一维数组,同时包含权重值
   let branches = flattenRoutes(routes);
+  // 将数组根据内部匹配到的权重排序
   rankRouteBranches(branches);
 
   let matches = null;
+  // 根据权重进行匹配,匹配到一个就终止循环(或者全都没有匹配中)
   for (let i = 0; matches == null && i < branches.length; ++i) {
     matches = matchRouteBranch(branches[i], pathname);
   }
@@ -163,6 +175,7 @@ export function matchRoutes(
   return matches;
 }
 
+// 保存在 branch 中的路由信息,后续在路由匹配时会用到
 interface RouteMeta {
   relativePath: string;
   caseSensitive: boolean;
@@ -170,6 +183,7 @@ interface RouteMeta {
   route: RouteObject;
 }
 
+// 扁平化的路由对象,包含当前路由对象对应的完整 path,权重和路由信息
 interface RouteBranch {
   path: string;
   score: number;
